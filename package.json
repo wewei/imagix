@@ -1,0 +1,11 @@
+{
+  "name": "imagix-workspace",
+  "scripts": {
+    "dev": "bun run --filter imagix dev",
+    "start": "bun run --filter imagix start"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}
