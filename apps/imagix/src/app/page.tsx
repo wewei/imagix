@@ -4,7 +4,7 @@ import { useState, FormEvent, useRef, useEffect } from "react";
 import { ChatHeader } from "@/components/ChatHeader";
 import { ChatMessages } from "@/components/ChatMessages";
 import { ChatInput } from "@/components/ChatInput";
-import { Message } from "@/components/types";
+import { Message } from "@/types/message";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
