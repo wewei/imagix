@@ -37,7 +37,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: input }),
+        body: JSON.stringify({ messages: [...messages, userMessage] }),
       });
       
       if (!response.ok) {
@@ -48,7 +48,7 @@ export default function Home() {
       
       const aiMessage: Message = {
         role: 'assistant',
-        content: data.completion
+        content: data.content,
       };
       
       setMessages((prev) => [...prev, aiMessage]);

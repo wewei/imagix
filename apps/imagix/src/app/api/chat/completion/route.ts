@@ -1,18 +1,16 @@
-import { NextRequest } from 'next/server';
+import { makeOpenAIChatService } from '@/services/OpenAIChat';
+import { ChatRequest } from '@/types/message';
+import { NextRequest, NextResponse } from 'next/server';
 
-// Interface for the request body
-interface CompletionRequest {
-  prompt: string;
-  maxTokens?: number;
-  temperature?: number;
-}
+console.log('OpenAI API Base URL:', process.env.OPENAI_API_BASE_URL);
+console.log('OpenAI API Key:', process.env.OPENAI_API_KEY ? '****' : 'Not set');
+console.log('OpenAI API Model:', process.env.OPENAI_API_MODEL);
 
-// Interface for the response
-interface CompletionResponse {
-  completion: string;
-  status: string;
-  timestamp: number;
-}
+const chatService = makeOpenAIChatService({
+  baseURL: process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1',
+  apiKey: process.env.OPENAI_API_KEY || '',
+  model: process.env.OPENAI_API_MODEL || 'gpt-3.5-turbo',
+});
 
 /**
  * API handler for AI text completion
@@ -21,27 +19,44 @@ interface CompletionResponse {
 export async function POST(request: NextRequest) {
   try {
     // Parse request body
-    const body = await request.json() as CompletionRequest;
-    const { prompt, maxTokens = 100, temperature = 0.7 } = body;
+    const body = await request.json() as ChatRequest;
+    const { messages, maxTokens, temperature, topP } = body;
     
     // Validate input
-    if (!prompt || typeof prompt !== 'string') {
-      return Response.json(
-        { error: 'Prompt is required and must be a string' },
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json(
+        { error: 'Messages are required' },
+        { status: 400 }
+      );
+    }
+
+    if (maxTokens && (typeof maxTokens !== 'number' || maxTokens <= 0)) {
+      return NextResponse.json(
+        { error: 'maxTokens must be a positive number' },
+        { status: 400 }
+      );
+    }
+
+    if (temperature && (typeof temperature !== 'number' || temperature < 0 || temperature > 1)) {
+      return NextResponse.json(
+        { error: 'temperature must be between 0 and 1' },
+        { status: 400 }
+      );
+    }
+    if (topP && (typeof topP !== 'number' || topP < 0 || topP > 1)) {
+      return NextResponse.json(
+        { error: 'topP must be between 0 and 1' },
         { status: 400 }
       );
     }
     
-    // In a real implementation, you would call an AI service here
-    // For now, we'll mock the response
-    const mockCompletion = `This is a mock AI completion for: "${prompt}"`;
-    
     // Prepare response
-    const response: CompletionResponse = {
-      completion: mockCompletion,
-      status: 'success',
-      timestamp: Date.now(),
-    };
+    const response = await chatService.chat({
+      messages,
+      maxTokens: maxTokens || 100,
+      temperature: temperature || 0.7,
+      topP: topP || 1,
+    });
     
     return Response.json(response);
   } catch (error) {

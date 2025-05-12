@@ -1,5 +1,5 @@
 import { OpenAI } from "openai";
-import { ChatCompletionRequest, ChatCompletionResponse } from "@/types/message";
+import { ChatRequest, ChatResponse } from "@/types/message";
 
 export type OpenAIChatConfig = {
   baseURL: string;
@@ -8,8 +8,8 @@ export type OpenAIChatConfig = {
 }
 
 export type OpenAIChatService = {
-  chat: (request: ChatCompletionRequest) => Promise<ChatCompletionResponse>;
-  streamChat: (request: ChatCompletionRequest) => AsyncGenerator<ChatCompletionRequest>;
+  chat: (request: ChatRequest) => Promise<ChatResponse>;
+  streamChat: (request: ChatRequest) => AsyncGenerator<ChatResponse>;
 }
 
 export function makeOpenAIChatService(config: OpenAIChatConfig): OpenAIChatService {
@@ -20,8 +20,8 @@ export function makeOpenAIChatService(config: OpenAIChatConfig): OpenAIChatServi
     baseURL
   });
 
-  async function chat(request: ChatCompletionRequest): Promise<ChatCompletionResponse> {
-    const response = await client.completions.create({
+  async function chat(request: ChatRequest): Promise<ChatResponse> {
+    const response = await client.chat.completions.create({
       model: model,
       messages: request.messages,
       top_p: request.topP ?? 1,
@@ -30,15 +30,29 @@ export function makeOpenAIChatService(config: OpenAIChatConfig): OpenAIChatServi
     });
 
     if (response.choices && response.choices.length > 0) {
-      const message = response.choices[0]?.text || "No content";
-      return { message };
+      const content = response.choices[0]?.message?.content ?? "";
+      return { content };
     }
     throw new Error("No choices in response");
   }
 
-  async function* streamChat(request: ChatCompletionRequest): AsyncGenerator<ChatCompletionRequest> {
+  async function* streamChat(request: ChatRequest): AsyncGenerator<ChatResponse> {
+    const response = await client.chat.completions.create({
+      model: model,
+      messages: request.messages,
+      top_p: request.topP ?? 1,
+      max_tokens: request.maxTokens ?? 100,
+      temperature: request.temperature ?? 0.7,
+      stream: true,
+    });
+
+    for await (const chunk of response) {
+      if (chunk.choices && chunk.choices.length > 0) {
+        const content = chunk.choices[0]?.delta?.content ?? "";
+        yield { content };
+      }
+    }
   }
 
   return { chat, streamChat}
-
 }

@@ -17,14 +17,13 @@ export type SystemMessage = BaseMessage & {
 
 export type Message = UserMessage | AssistantMessage | SystemMessage;
 
-export type ChatCompletionRequest = {
+export type ChatRequest = {
   messages: Message[];
   maxTokens?: number;
   temperature?: number;
   topP?: number;
 }
 
-export type ChatCompletionResponse = {
-  message: string;
-  toolCall?: string;
+export type ChatResponse = {
+  content: string;
 }
