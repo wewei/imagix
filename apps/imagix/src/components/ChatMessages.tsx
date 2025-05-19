@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react';
-import { Message } from '../agent/types';
+import { Message } from '../core/types';
 import { MessageBubble } from './MessageBubble';
 
 interface ChatMessagesProps {
