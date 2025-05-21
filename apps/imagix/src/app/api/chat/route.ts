@@ -1,10 +1,8 @@
-import { createDeepSeek, deepseek } from '@ai-sdk/deepseek';
 import { streamText } from 'ai';
+import { siliconFlow } from '@/lib/ai/siliconFlow';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
-
-const siliconFlow = createDeepSeek({ baseURL: 'https://api.siliconflow.cn/v1/' });
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
