@@ -15,10 +15,10 @@ export const embeddings = pgTable(
     content: text('content').notNull(),
     embedding: vector('embedding', { dimensions: 768 }).notNull(),
   },
-  table => ({
-    embeddingIndex: index('embeddingIndex').using(
+  table => ([
+    index('embeddingIndex').using(
       'hnsw',
       table.embedding.op('vector_cosine_ops'),
     ),
-  }),
+  ]),
 );
