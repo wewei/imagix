@@ -3,7 +3,7 @@
 import { useChat } from '@ai-sdk/react';
 
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat();
+  const { messages, input, handleInputChange, handleSubmit } = useChat({ maxSteps: 3 });
   return (
     <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
       {messages.map(message => (
@@ -13,6 +13,8 @@ export default function Chat() {
             switch (part.type) {
               case 'text':
                 return <div key={`${message.id}-${i}`}>{part.text}</div>;
+              // case 'tool-invocation':
+              //   return <div key={`${message.id}-${i}`}>{part.toolInvocation.toolName}</div>;
             }
           })}
         </div>
